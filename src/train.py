@@ -196,9 +196,9 @@ def main():
     
     file_path = 'data/wikitext-103/wiki.train.tokens'
     
-    print("="*60)
+    print("-"*10)
     print("TRAINING N-GRAM TEXT PREDICTOR")
-    print("="*60)
+    print("-"*10)
     
     # Step 1: Build vocabulary (shared across all models)
     vocab, word_freq = build_vocabulary(file_path, max_vocab=30000)
@@ -219,9 +219,9 @@ def main():
     starters = build_sentence_starters(file_path, top_n=20)
     save_model(starters, 'models/sentence_starters.pkl')
     
-    print("\n" + "="*60)
+    print("\n" + "-"*10)
     print("TRAINING COMPLETE!")
-    print("="*60)
+    print("-"*10)
     print("\nModels created:")
     print("  - models/trigram_model.pkl")
     print("  - models/bigram_model.pkl")
