@@ -161,7 +161,7 @@ def build_common_words_list(file_path: str, max_vocab: int = 50000):
             
             line_count += 1
             if line_count % 200000 == 0:
-                print(f"\nCounting words: {line_count:,} lines")
+                print(f"Counting words: {line_count:,} lines")
             
             for word in line.split():
                 word_freq[word] += 1
@@ -176,7 +176,7 @@ def build_common_words_list(file_path: str, max_vocab: int = 50000):
 def sentence_starters(file_path: str, max_vocab: int = 50000):
     """Idntify words and count words that appear at the start of sentences"""
 
-    print("Identifying sentence starters...")
+    print("\nIdentifying sentence starters...")
 
     starter_freq = defaultdict(int)
     line_count = 0
@@ -216,14 +216,14 @@ if __name__ == "__main__":
     #     min_count=3,     
     #     max_vocab=30000   
     # )
-    # common_words = build_common_words_list(
-    #     'data/wikitext-103/wiki.train.tokens',
-    #     max_vocab=30000
-    # )
+    common_words = build_common_words_list(
+        'data/wikitext-103/wiki.train.tokens',
+        max_vocab=100
+    )
     # save_model(bigrams, 'models/bigram_model.pkl')
-    # save_model(common_words, 'models/common_words.pkl')
+    save_model(common_words, 'models/common_words.pkl')
     starters = sentence_starters(
         'data/wikitext-103/wiki.train.tokens',
-        max_vocab=30000
+        max_vocab=20
     )
     save_model(starters, 'models/sentence_starters.pkl')
