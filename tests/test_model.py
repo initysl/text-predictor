@@ -7,7 +7,11 @@ def test_trigram_model():
         """Test trigram model predictions"""
         test_contexts = [
             ("New", "York"),
+            ("Barrack", "Abraham"),
             ("the", "first"),
+            ("in", "the"),
+            ("the", "United"),
+            ("do", "you"),
             ("United", "States"),
             ("according", "to")
         ]

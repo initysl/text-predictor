@@ -73,6 +73,78 @@ def build_trigram_model(file_path: str, min_count: int = 5, max_vocab: int = 500
     
     return filtered
 
+def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 50000):
+    """Build bigram model from WikiText data"""
+    
+    print("Step 1: Building vocabulary...")
+    
+    # First pass: count word frequencies
+    word_freq = defaultdict(int)
+    line_count = 0
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('='):
+                continue
+            
+            line_count += 1
+            if line_count % 200000 == 0:
+                print(f"  Counting words: {line_count:,} lines")
+            
+            for word in line.split():
+                word_freq[word] += 1
+    
+    # Keep only top N most common words
+    print(f"\nTotal unique words: {len(word_freq):,}")
+    top_words = set(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab])
+    vocab = {word for word, count in top_words}
+    print(f"Vocabulary limited to: {len(vocab):,} words")
+    del word_freq  # Free memory
+    
+    print("\nStep 2: Building bigrams...")
+    
+    # Second pass: build bigrams with limited vocab
+    bigrams = defaultdict(lambda: defaultdict(int))
+    line_count = 0
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('='):
+                continue
+            
+            line_count += 1
+            if line_count % 200000 == 0:
+                print(f"  Building bigrams: {line_count:,} lines, {len(bigrams):,} unique")
+            
+            words = line.split()
+            if len(words) < 2:
+                continue
+            
+            # Only process words in vocabulary
+            for i in range(len(words) - 1):
+                w1, w2 = words[i], words[i+1]
+                
+                # Skip if any word not in vocab
+                if w1 not in vocab or w2 not in vocab:
+                    continue
+                
+                bigrams[w1][w2] += 1
+    
+    print(f"\nTotal bigrams before filtering: {len(bigrams):,}")
+    
+    # Filter rare bigrams
+    filtered = {}
+    for context, next_words in bigrams.items():
+        filtered_next = {w: c for w, c in next_words.items() if c >= min_count}
+        if filtered_next:
+            filtered[context] = filtered_next
+
+    print(f"After filtering (min_count={min_count}): {len(filtered):,}")
+
+    return filtered 
+
 def save_model(trigrams, output_path):
     """Save model"""
     with open(output_path, 'wb') as f:
@@ -80,10 +152,10 @@ def save_model(trigrams, output_path):
     print(f"Model saved to {output_path}")
 
 if __name__ == "__main__":
-    trigrams = build_trigram_model(
+    trigrams = build_bigram_model(
         'data/wikitext-103/wiki.train.tokens',
-        min_count=10,     
+        min_count=3,     
         max_vocab=30000   
     )
     
-    save_model(trigrams, 'models/trigram_model.pkl')
+    save_model(trigrams, 'models/bigram_model.pkl')
