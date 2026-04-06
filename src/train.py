@@ -147,6 +147,9 @@ def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 5000
 
 def build_common_words_list(file_path: str, max_vocab: int = 50000):
     """Build list of most common words"""
+
+    print("Building list of most common words...")
+
     word_freq = defaultdict(int)
     line_count = 0
     
@@ -158,7 +161,7 @@ def build_common_words_list(file_path: str, max_vocab: int = 50000):
             
             line_count += 1
             if line_count % 200000 == 0:
-                print(f"  Counting words: {line_count:,} lines")
+                print(f"\nCounting words: {line_count:,} lines")
             
             for word in line.split():
                 word_freq[word] += 1
@@ -170,6 +173,29 @@ def build_common_words_list(file_path: str, max_vocab: int = 50000):
     
     return common_words
 
+def sentence_starters(file_path: str, max_vocab: int = 50000):
+    """Idntify words and count words that appear at the start of sentences"""
+
+    print("Identifying sentence starters...")
+
+    starter_freq = defaultdict(int)
+    line_count = 0
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('='):
+                continue
+
+            line_count += 1
+            if line_count % 200000 == 0:
+                print(f" Counting sentence starters: {line_count:,} lines")
+            first_word = line.split()[0]
+            starter_freq[first_word] += 1
+    top_starters = sorted(starter_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab]
+    starters = [word for word, count in top_starters]
+    print(f" Most common sentence starters: {starters[:20]}...")
+    return starters
 
 def save_model(trigrams, output_path):
     """Save model"""
@@ -177,20 +203,27 @@ def save_model(trigrams, output_path):
         pickle.dump(trigrams, f)
     print(f"Model saved to {output_path}")
 
-if __name__ == "__main__":
-    trigrams = build_bigram_model(
-        'data/wikitext-103/wiki.train.tokens',
-        min_count=3,     
-        max_vocab=30000   
-    )
-    bigrams = build_bigram_model(
-        'data/wikitext-103/wiki.train.tokens',
-        min_count=3,     
-        max_vocab=30000   
-    )
-    common_words = build_common_words_list(
+
+if __name__ == "__main__": 
+    
+    # trigrams = build_trigram_model(
+    #     'data/wikitext-103/wiki.train.tokens',
+    #     min_count=3,     
+    #     max_vocab=30000   
+    # )
+    # bigrams = build_bigram_model(
+    #     'data/wikitext-103/wiki.train.tokens',
+    #     min_count=3,     
+    #     max_vocab=30000   
+    # )
+    # common_words = build_common_words_list(
+    #     'data/wikitext-103/wiki.train.tokens',
+    #     max_vocab=30000
+    # )
+    # save_model(bigrams, 'models/bigram_model.pkl')
+    # save_model(common_words, 'models/common_words.pkl')
+    starters = sentence_starters(
         'data/wikitext-103/wiki.train.tokens',
         max_vocab=30000
     )
-    save_model(bigrams, 'models/bigram_model.pkl')
-    save_model(common_words, 'models/common_words.pkl')
+    save_model(starters, 'models/sentence_starters.pkl')
