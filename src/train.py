@@ -145,6 +145,32 @@ def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 5000
 
     return filtered 
 
+def build_common_words_list(file_path: str, max_vocab: int = 50000):
+    """Build list of most common words"""
+    word_freq = defaultdict(int)
+    line_count = 0
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('='):
+                continue
+            
+            line_count += 1
+            if line_count % 200000 == 0:
+                print(f"  Counting words: {line_count:,} lines")
+            
+            for word in line.split():
+                word_freq[word] += 1
+    
+    top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab]
+    common_words = [word for word, count in top_words]
+    
+    print(f"Most common words: {common_words[:100]}...")
+    
+    return common_words
+
+
 def save_model(trigrams, output_path):
     """Save model"""
     with open(output_path, 'wb') as f:
@@ -157,5 +183,14 @@ if __name__ == "__main__":
         min_count=3,     
         max_vocab=30000   
     )
-    
-    save_model(trigrams, 'models/bigram_model.pkl')
+    bigrams = build_bigram_model(
+        'data/wikitext-103/wiki.train.tokens',
+        min_count=3,     
+        max_vocab=30000   
+    )
+    common_words = build_common_words_list(
+        'data/wikitext-103/wiki.train.tokens',
+        max_vocab=30000
+    )
+    save_model(bigrams, 'models/bigram_model.pkl')
+    save_model(common_words, 'models/common_words.pkl')
