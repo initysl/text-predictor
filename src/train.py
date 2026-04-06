@@ -1,12 +1,12 @@
 import pickle
 from collections import defaultdict
 
-def build_trigram_model(file_path: str, min_count: int = 5, max_vocab: int = 50000):
-    """Build trigram model from WikiText data"""
+
+def build_vocabulary(file_path, max_vocab=30000):
+    """Build vocabulary from WikiText data (shared across all models)"""
     
-    print("Step 1: Building vocabulary...")
+    print("Building vocabulary...")
     
-    # First pass: count word frequencies
     word_freq = defaultdict(int)
     line_count = 0
     
@@ -18,21 +18,30 @@ def build_trigram_model(file_path: str, min_count: int = 5, max_vocab: int = 500
             
             line_count += 1
             if line_count % 200000 == 0:
-                print(f"  Counting words: {line_count:,} lines")
+                print(f"  Processing: {line_count:,} lines")
             
             for word in line.split():
+                # Skip <unk> tokens
+                if word == '<unk>':
+                    continue
                 word_freq[word] += 1
     
-    # Keep only top N most common words
     print(f"\nTotal unique words: {len(word_freq):,}")
-    top_words = set(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab])
+    
+    # Keep only top N most common words
+    top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab]
     vocab = {word for word, count in top_words}
+    
     print(f"Vocabulary limited to: {len(vocab):,} words")
-    del word_freq  # Free memory
     
-    print("\nStep 2: Building trigrams...")
+    return vocab, word_freq
+
+
+def build_trigram_model(file_path, vocab, min_count=5):
+    """Build trigram model from WikiText data"""
     
-    # Second pass: build trigrams with limited vocab
+    print("\nBuilding trigrams...")
+    
     trigrams = defaultdict(lambda: defaultdict(int))
     line_count = 0
     
@@ -50,12 +59,13 @@ def build_trigram_model(file_path: str, min_count: int = 5, max_vocab: int = 500
             if len(words) < 3:
                 continue
             
-            # Only process words in vocabulary
+            # Extract trigrams
             for i in range(len(words) - 2):
                 w1, w2, w3 = words[i], words[i+1], words[i+2]
                 
-                # Skip if any word not in vocab
-                if w1 not in vocab or w2 not in vocab or w3 not in vocab:
+                # Skip if any word not in vocab or is <unk>
+                if (w1 not in vocab or w2 not in vocab or w3 not in vocab or
+                    w1 == '<unk>' or w2 == '<unk>' or w3 == '<unk>'):
                     continue
                 
                 trigrams[(w1, w2)][w3] += 1
@@ -73,38 +83,12 @@ def build_trigram_model(file_path: str, min_count: int = 5, max_vocab: int = 500
     
     return filtered
 
-def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 50000):
+
+def build_bigram_model(file_path, vocab, min_count=5):
     """Build bigram model from WikiText data"""
     
-    print("Step 1: Building vocabulary...")
+    print("\nBuilding bigrams...")
     
-    # First pass: count word frequencies
-    word_freq = defaultdict(int)
-    line_count = 0
-    
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith('='):
-                continue
-            
-            line_count += 1
-            if line_count % 200000 == 0:
-                print(f"  Counting words: {line_count:,} lines")
-            
-            for word in line.split():
-                word_freq[word] += 1
-    
-    # Keep only top N most common words
-    print(f"\nTotal unique words: {len(word_freq):,}")
-    top_words = set(sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab])
-    vocab = {word for word, count in top_words}
-    print(f"Vocabulary limited to: {len(vocab):,} words")
-    del word_freq  # Free memory
-    
-    print("\nStep 2: Building bigrams...")
-    
-    # Second pass: build bigrams with limited vocab
     bigrams = defaultdict(lambda: defaultdict(int))
     line_count = 0
     
@@ -122,12 +106,13 @@ def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 5000
             if len(words) < 2:
                 continue
             
-            # Only process words in vocabulary
+            # Extract bigrams
             for i in range(len(words) - 1):
                 w1, w2 = words[i], words[i+1]
                 
-                # Skip if any word not in vocab
-                if w1 not in vocab or w2 not in vocab:
+                # Skip if any word not in vocab or is <unk>
+                if (w1 not in vocab or w2 not in vocab or
+                    w1 == '<unk>' or w2 == '<unk>'):
                     continue
                 
                 bigrams[w1][w2] += 1
@@ -143,87 +128,106 @@ def build_bigram_model(file_path: str, min_count: int = 5, max_vocab: int = 5000
 
     print(f"After filtering (min_count={min_count}): {len(filtered):,}")
 
-    return filtered 
+    return filtered
 
-def build_common_words_list(file_path: str, max_vocab: int = 50000):
-    """Build list of most common words"""
 
-    print("Building list of most common words...")
-
-    word_freq = defaultdict(int)
-    line_count = 0
+def build_common_words_list(word_freq, top_n=100):
+    """Build list of most common words from word frequency dict"""
     
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith('='):
-                continue
-            
-            line_count += 1
-            if line_count % 200000 == 0:
-                print(f"Counting words: {line_count:,} lines")
-            
-            for word in line.split():
-                word_freq[word] += 1
+    print("\nBuilding list of most common words...")
     
-    top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab]
+    # Sort by frequency and take top N
+    top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:top_n]
     common_words = [word for word, count in top_words]
     
-    print(f"Most common words: {common_words[:100]}...")
+    print(f"  Top 10 common words: {common_words[:10]}")
     
     return common_words
 
-def sentence_starters(file_path: str, max_vocab: int = 50000):
-    """Idntify words and count words that appear at the start of sentences"""
 
+def build_sentence_starters(file_path, top_n=20):
+    """Identify words that appear at the start of sentences"""
+    
     print("\nIdentifying sentence starters...")
-
+    
     starter_freq = defaultdict(int)
     line_count = 0
-
+    
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith('='):
                 continue
-
+            
             line_count += 1
             if line_count % 200000 == 0:
-                print(f" Counting sentence starters: {line_count:,} lines")
-            first_word = line.split()[0]
+                print(f"  Counting sentence starters: {line_count:,} lines")
+            
+            words = line.split()
+            if not words:  # Safety check for empty lines
+                continue
+            
+            first_word = words[0]
+            
+            # Skip <unk> tokens
+            if first_word == '<unk>':
+                continue
+            
             starter_freq[first_word] += 1
-    top_starters = sorted(starter_freq.items(), key=lambda x: x[1], reverse=True)[:max_vocab]
+    
+    # Sort by frequency and take top N
+    top_starters = sorted(starter_freq.items(), key=lambda x: x[1], reverse=True)[:top_n]
     starters = [word for word, count in top_starters]
-    print(f" Most common sentence starters: {starters[:20]}...")
+    
+    print(f"  Top 20 sentence starters: {starters[:20]}")
+    
     return starters
 
-def save_model(trigrams, output_path):
-    """Save model"""
+
+def save_model(model, output_path):
+    """Save model to file using pickle"""
     with open(output_path, 'wb') as f:
-        pickle.dump(trigrams, f)
+        pickle.dump(model, f)
     print(f"Model saved to {output_path}")
 
 
-if __name__ == "__main__": 
+def main():
+    """Main training pipeline"""
     
-    # trigrams = build_trigram_model(
-    #     'data/wikitext-103/wiki.train.tokens',
-    #     min_count=3,     
-    #     max_vocab=30000   
-    # )
-    # bigrams = build_bigram_model(
-    #     'data/wikitext-103/wiki.train.tokens',
-    #     min_count=3,     
-    #     max_vocab=30000   
-    # )
-    common_words = build_common_words_list(
-        'data/wikitext-103/wiki.train.tokens',
-        max_vocab=100
-    )
-    # save_model(bigrams, 'models/bigram_model.pkl')
+    file_path = 'data/wikitext-103/wiki.train.tokens'
+    
+    print("="*60)
+    print("TRAINING N-GRAM TEXT PREDICTOR")
+    print("="*60)
+    
+    # Step 1: Build vocabulary (shared across all models)
+    vocab, word_freq = build_vocabulary(file_path, max_vocab=30000)
+    
+    # Step 2: Build trigram model
+    trigrams = build_trigram_model(file_path, vocab, min_count=5)
+    save_model(trigrams, 'models/trigram_model.pkl')
+    
+    # Step 3: Build bigram model
+    bigrams = build_bigram_model(file_path, vocab, min_count=5)
+    save_model(bigrams, 'models/bigram_model.pkl')
+    
+    # Step 4: Build common words list (from word_freq we already have)
+    common_words = build_common_words_list(word_freq, top_n=100)
     save_model(common_words, 'models/common_words.pkl')
-    starters = sentence_starters(
-        'data/wikitext-103/wiki.train.tokens',
-        max_vocab=20
-    )
+    
+    # Step 5: Build sentence starters
+    starters = build_sentence_starters(file_path, top_n=20)
     save_model(starters, 'models/sentence_starters.pkl')
+    
+    print("\n" + "="*60)
+    print("TRAINING COMPLETE!")
+    print("="*60)
+    print("\nModels created:")
+    print("  - models/trigram_model.pkl")
+    print("  - models/bigram_model.pkl")
+    print("  - models/common_words.pkl")
+    print("  - models/sentence_starters.pkl")
+
+
+if __name__ == "__main__":
+    main()
