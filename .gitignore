@@ -1,0 +1,30 @@
+# Python environment
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+.pytest_cache/
+
+# Type check caches
+.mypy_cache/
+.pyre/
+.pytype/
+
+.vscode/
+
+# Model artifacts and generated data
+models/*.pkl
+data/wikitext-103/
+
+# Logs
+*.log
