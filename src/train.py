@@ -200,22 +200,22 @@ def main():
     print("TRAINING N-GRAM TEXT PREDICTOR")
     print("-"*10)
     
-    # Step 1: Build vocabulary (shared across all models)
+    # Build vocabulary
     vocab, word_freq = build_vocabulary(file_path, max_vocab=30000)
     
-    # Step 2: Build trigram model
+    # Build trigram model
     trigrams = build_trigram_model(file_path, vocab, min_count=5)
     save_model(trigrams, 'models/trigram_model.pkl')
     
-    # Step 3: Build bigram model
+    # Build bigram model
     bigrams = build_bigram_model(file_path, vocab, min_count=5)
     save_model(bigrams, 'models/bigram_model.pkl')
     
-    # Step 4: Build common words list (from word_freq we already have)
+    # Build common words list
     common_words = build_common_words_list(word_freq, top_n=100)
     save_model(common_words, 'models/common_words.pkl')
     
-    # Step 5: Build sentence starters
+    # Build sentence starters
     starters = build_sentence_starters(file_path, top_n=20)
     save_model(starters, 'models/sentence_starters.pkl')
     
