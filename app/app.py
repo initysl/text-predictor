@@ -1,7 +1,6 @@
 import streamlit as st
 import pickle
 import sys
-import re
 
 sys.path.append('..')
 from src.predict import TextPredictor
@@ -15,12 +14,11 @@ st.set_page_config(
 )
 
 
-
 # Styling
 st.markdown("""
 <style>
 textarea {
-    font-size: 20px !important;
+    font-size: 18px !important;
     line-height: 1.6;
 }
 
@@ -61,6 +59,8 @@ def load_predictor():
 def init_state():
     if "text" not in st.session_state:
         st.session_state.text = ""
+    if "text_area" not in st.session_state:
+        st.session_state.text_area = ""
     if "predictions_made" not in st.session_state:
         st.session_state.predictions_made = 0
     if "top1_accepted" not in st.session_state:
@@ -73,6 +73,7 @@ def add_word(word):
     else:
         st.session_state.text = word
 
+    st.session_state.text_area = st.session_state.text
     st.session_state.predictions_made += 1
 
 
@@ -99,18 +100,21 @@ def get_inline_suggestion(text, predictor):
     return suggestion
 
 
+# Handle real-time update
+def on_text_change():
+    st.session_state.text = st.session_state.text_area
+
+
 # Main app
 def main():
     init_state()
     predictor = load_predictor()
 
     st.title("⌨️ Smart Text Predictor")
-    st.caption("Real-time ML N-gram language model")
+    st.caption("Real-time ML N-gram language model system")
 
     st.divider()
 
-    
-    
     st.subheader("Start typing")
 
     col_main, col_side = st.columns([3, 1])
@@ -121,13 +125,12 @@ def main():
             value=st.session_state.text,
             height=140,
             key="text_area",
-            placeholder="Type something like: The future of artificial"
+            placeholder="Type something like: The future of artificial",
+            on_change=on_text_change
         )
 
-        st.session_state.text = user_text
-
         # Inline autocomplete (ghost text)
-        inline = get_inline_suggestion(user_text, predictor)
+        inline = get_inline_suggestion(st.session_state.text, predictor)
 
         # if inline:
         #     st.markdown(
@@ -138,15 +141,16 @@ def main():
 
 
     # Horizontal (Suggestion chips)
-    if st.session_state.text.strip(): # type: ignore
-        preds = predictor.predict(st.session_state.text, top_k=5)
+    if st.session_state.get("text", "").strip():
+        result = predictor.predict_with_context(
+            st.session_state.text,
+            top_k=5
+        )
+
+        preds = result["predictions"]
+        fallback = result["fallback_used"]
 
         st.markdown("### Suggestions")
-        result = predictor.predict_with_context(
-                st.session_state.text,
-                top_k=5
-            )
-        fallback = result["fallback_used"]
         st.caption(f"Model: {fallback.upper()}")
 
         cols = st.columns(len(preds))
@@ -155,7 +159,7 @@ def main():
             with col:
                 if st.button(
                     f"{word}\n{prob:.0%}",
-                    key=f"chip_{i}",
+                    key=f"chip_{i}_{st.session_state.predictions_made}",
                     use_container_width=True
                 ):
                     add_word(word)
@@ -176,12 +180,13 @@ def main():
     with col1:
         if st.button("Clear Text"):
             st.session_state.text = ""
+            st.session_state.text_area = ""
             st.rerun()
 
     with col2:
         st.download_button(
             "Download Text",
-            data=st.session_state.text, # type: ignore
+            data=st.session_state.text,
             file_name="text.txt"
         )
 

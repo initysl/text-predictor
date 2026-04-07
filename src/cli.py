@@ -17,7 +17,7 @@ class TextPredictorCLI:
             'top_accepted': 0,
             'custom_typed': 0
         }
-        print(Fore.GREEN + "✅ Ready!\n")
+        print(Fore.GREEN + "Ready!\n")
     
     def _get_confidence_color(self, probability):
         """Return color based on confidence level"""
@@ -30,7 +30,7 @@ class TextPredictorCLI:
     
     def _display_predictions(self, predictions):
         """Display predictions with colors and bars"""
-        print("\n" + Fore.CYAN + "📊 Predictions:")
+        print("\n" + Fore.CYAN + "Predictions:")
         print(Fore.CYAN + "-" * 50)
         
         for idx, (word, prob) in enumerate(predictions, 1):
@@ -51,7 +51,7 @@ class TextPredictorCLI:
         
         accuracy = (self.stats['top_accepted'] / total * 100) if total > 0 else 0
         
-        print("\n" + Fore.MAGENTA + "📈 Session Stats:")
+        print("\n" + Fore.MAGENTA + "Session Stats:")
         print(Fore.MAGENTA + "-" * 50)
         print(f"Total predictions: {total}")
         print(f"Top suggestion accepted: {self.stats['top_accepted']} ({accuracy:.1f}%)")
@@ -86,13 +86,13 @@ class TextPredictorCLI:
                 self.stats['total_predictions'] += 1
             
             # Get user input
-            print(Fore.CYAN + "\n💬 Your input: ", end="")
+            print(Fore.CYAN + "\nYour input: ", end="")
             user_input = input().strip()
             
             # Handle commands
             if user_input.lower() in ['quit', 'exit', 'q']:
                 self._display_stats()
-                print(Fore.GREEN + "\n👋 Goodbye!\n")
+                print(Fore.GREEN + "\nGoodbye!\n")
                 break
             
             elif user_input.lower() == 'stats':
@@ -101,15 +101,15 @@ class TextPredictorCLI:
             
             elif user_input.lower() == 'clear':
                 current_text = ""
-                print(Fore.GREEN + "✅ Text cleared!")
+                print(Fore.GREEN + "Text cleared!")
                 continue
             
             elif user_input == '':
                 # Enter pressed - submit and reset
                 if current_text:
-                    print(Fore.GREEN + f"\n📝 Final text: {current_text}")
+                    print(Fore.GREEN + f"\nFinal text: {current_text}")
                     current_text = ""
-                    print(Fore.GREEN + "✅ Starting fresh!\n")
+                    print(Fore.GREEN + "Starting fresh!\n")
                 continue
             
             elif user_input in ['1', '2', '3', '4', '5']:
@@ -122,15 +122,15 @@ class TextPredictorCLI:
                     if idx == 0:  # Top prediction
                         self.stats['top_accepted'] += 1
                     
-                    print(Fore.GREEN + f"✅ Added: {selected_word}")
+                    print(Fore.GREEN + f"Added: {selected_word}")
                 else:
-                    print(Fore.RED + "❌ Invalid selection!")
+                    print(Fore.RED + "Invalid selection!")
             
             else:
                 # Text typed - add to current text
                 current_text = f"{current_text} {user_input}".strip()
                 self.stats['custom_typed'] += 1
-                print(Fore.GREEN + f"✅ Added: {user_input}")
+                print(Fore.GREEN + f"Added: {user_input}")
 
 
 def main():
@@ -139,10 +139,10 @@ def main():
         cli = TextPredictorCLI()
         cli.run()
     except KeyboardInterrupt:
-        print(Fore.YELLOW + "\n\n⚠️  Interrupted by user")
-        print(Fore.GREEN + "👋 Goodbye!\n")
+        print(Fore.YELLOW + "\n\n  Interrupted by user")
+        print(Fore.GREEN + " Goodbye!\n")
     except Exception as e:
-        print(Fore.RED + f"\n❌ Error: {e}")
+        print(Fore.RED + f"\n Error: {e}")
 
 
 if __name__ == "__main__":
