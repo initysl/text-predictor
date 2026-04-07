@@ -103,32 +103,6 @@ function App() {
             />
           </div>
         </div>
-
-        {/* Info Section */}
-        <div className='mt-8 bg-white rounded-lg shadow-lg p-6'>
-          <h2 className='text-xl font-semibold text-gray-800 mb-4'>
-            ℹ️ How It Works
-          </h2>
-          <div className='prose prose-sm max-w-none text-gray-600'>
-            <p>
-              This text predictor uses <strong>N-gram language models</strong>{' '}
-              trained on WikiText-103 to predict the next word based on context.
-            </p>
-            <ul className='mt-4 space-y-2'>
-              <li>
-                <strong>Trigram (🎯):</strong> Uses last 2 words for prediction
-              </li>
-              <li>
-                <strong>Bigram (🎲):</strong> Falls back to last 1 word if
-                trigram not found
-              </li>
-              <li>
-                <strong>Common (📚):</strong> Returns most frequent words as
-                last resort
-              </li>
-            </ul>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
