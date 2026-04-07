@@ -1,4 +1,4 @@
-from predict import TextPredictor
+from backend.core.predict import TextPredictor
 from colorama import Fore, Style, init
 
 

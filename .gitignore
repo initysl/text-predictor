@@ -1,3 +1,14 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+
 # Python environment
 .venv/
 
@@ -23,8 +34,7 @@ dist/
 .vscode/
 
 # Model artifacts and generated data
-models/*.pkl
-data/wikitext-103/
+server/models/*.pkl
+server/data/wikitext-103/
 
-# Logs
-*.log
+
