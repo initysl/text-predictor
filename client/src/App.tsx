@@ -107,6 +107,11 @@ function App() {
         <div className='container mx-auto px-4 py-6 text-center text-gray-600 text-sm '>
           <p>| Trained on WikiText-103 |</p>
         </div>
+        <div>
+          <a href='' className='text-gray-600 text-sm hover:underline'>
+            View on GitHub
+          </a>
+        </div>
       </footer>
     </div>
   );

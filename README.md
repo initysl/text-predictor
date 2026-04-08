@@ -92,7 +92,7 @@ Download WikiText-103 dataset:
 - Download from Hugging Face or Kaggle
 - Extract to `server/data/wikitext-103/`
 
-Train the models(can tune max_vocab and min count as desired):
+Train the models(can tune max_vocab and min count as desire):
 
 ```bash
 cd ../core
@@ -189,11 +189,11 @@ API documentation: http://localhost:8000/docs
 
 ## Known Limitations
 
-Limited to 30k vocabulary (rare words not recognized)
-Formal writing style (trained on Wikipedia)
-No slang or modern internet language
-Cannot understand long-term context (only last 2 words)
-Case-insensitive (all predictions lowercase)
+- Limited to 30k vocabulary (rare words not recognized)
+- Formal writing style (trained on Wikipedia)
+- No slang or modern internet language
+- Cannot understand long-term context (only last 2 words)
+- Case-insensitive (all predictions lowercase)
 
 ## Future Improvements
 

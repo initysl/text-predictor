@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from schemas import PredictionRequest, PredictionResponse, Prediction, StatsResponse
@@ -9,17 +12,23 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware for React frontend
+origins = os.getenv("CORS_ORIGINS", "*")
+origins_list = [origin.strip() for origin in origins.split(",") if origin]
+if not origins_list:
+    origins_list = ["http://localhost:5173"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  
+    allow_origins=origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Initialize models on startup
-model_manager = ModelManager()
+@app.on_event("startup")
+def load_models():
+    global model_manager
+    model_manager = ModelManager()
 
 
 @app.get("/")
