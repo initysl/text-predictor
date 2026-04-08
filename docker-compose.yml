@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  server:
+    build: ./server
+    container_name: text_predictor_server
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: text_predictor_client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    restart: unless-stopped
