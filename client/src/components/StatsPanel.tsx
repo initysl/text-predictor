@@ -32,17 +32,12 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
       : '0.0';
 
   return (
-    <div className='bg-white rounded-lg shadow-lg p-6'>
-      <h2 className='text-xl font-semibold text-gray-800 mb-6'>
-        📊 Statistics
-      </h2>
+    <div className='bg-white rounded-2xl border-t border-b border-gray-200 p-6'>
+      <h2 className='text-md font-semibold text-gray-800 mb-6'>Stats</h2>
 
       {/* Session Stats */}
       <div className='mb-6'>
-        <h3 className='text-sm font-semibold text-gray-600 mb-3 uppercase'>
-          Session
-        </h3>
-        <div className='grid grid-cols-1 gap-3'>
+        <div className='grid grid-cols-3 gap-3'>
           <div className='bg-purple-50 rounded-lg p-4'>
             <p className='text-sm text-gray-600'>Predictions Made</p>
             <p className='text-3xl font-bold text-purple-600'>
@@ -65,7 +60,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
       {/* Model Stats */}
       {modelStats && (
         <div>
-          <h3 className='text-sm font-semibold text-gray-600 mb-3 uppercase'>
+          <h3 className='text-sm font-semibold text-gray-600 mb-3'>
             Model Info
           </h3>
           <div className='space-y-2 text-sm'>

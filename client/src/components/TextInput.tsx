@@ -18,7 +18,7 @@ const TextInput: React.FC<TextInputProps> = ({
   onClear,
   disabled = false,
   predictions,
-  fallbackUsed,
+  // fallbackUsed,
   onSelectPrediction,
   loading = false,
 }) => {
@@ -67,9 +67,9 @@ const TextInput: React.FC<TextInputProps> = ({
   // };
 
   return (
-    <div className='bg-white rounded-lg shadow-lg p-4'>
+    <div className='bg-white rounded-2xl border-t border-b border-gray-200 p-4'>
       <div className='flex items-center justify-between mb-4'>
-        <h2 className='text-xl font-semibold text-gray-800'>Your Text</h2>
+        <h2 className='text-md font-semibold text-gray-800'>Your Text</h2>
         <button
           onClick={onClear}
           disabled={disabled || !value}
@@ -84,7 +84,7 @@ const TextInput: React.FC<TextInputProps> = ({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder='Start typing here...'
-        className='w-full h-40 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none text-lg disabled:bg-gray-50 disabled:cursor-not-allowed transition-colors'
+        className='w-full h-20 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none text-lg disabled:bg-gray-50 disabled:cursor-not-allowed transition-colors'
       />
 
       <div className='mt-4 flex items-center justify-between text-sm text-gray-600'>
@@ -111,7 +111,7 @@ const TextInput: React.FC<TextInputProps> = ({
                 <button
                   key={index}
                   onClick={() => onSelectPrediction(pred.word)}
-                  className={`border-2 rounded-full px-4 py-2 transition-all hover:scale-105 hover:shadow-md ${confidenceColor}`}
+                  className={`border-2 rounded-full px-2 py-1 transition-all hover:scale-105 hover:shadow-md ${confidenceColor}`}
                 >
                   <div className='flex items-center gap-2'>
                     <span className='font-semibold'>{pred.word}</span>

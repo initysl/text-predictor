@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from './components/Header';
 import TextInput from './components/TextInput';
 import StatsPanel from './components/StatsPanel';
@@ -10,57 +10,80 @@ function App() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [fallbackUsed, setFallbackUsed] = useState('empty');
   const [loading, setLoading] = useState(false);
-  const [predictionsMode, setPredictionsMode] = useState(0);
+  const [predictionsCount, setPredictionsCount] = useState(0);
   const [topAccepted, setTopAccepted] = useState(0);
 
-  useEffect(() => {
-    const fetchPredictions = async () => {
-      if (!text.trim()) {
-        setPredictions([]);
-        setFallbackUsed('empty');
-        return;
-      }
+  const requestIdRef = useRef(0);
 
-      setLoading(true);
+  useEffect(() => {
+    if (!text.trim()) {
+      setPredictions([]);
+      setFallbackUsed('empty');
+      setLoading(false);
+      return;
+    }
+
+    const currentRequestId = ++requestIdRef.current;
+    let isActive = true;
+
+    const fetchPredictions = async () => {
+      // Delay showing loading to avoid flicker
+      const loadingTimeout = setTimeout(() => {
+        if (isActive) setLoading(true);
+      }, 150);
+
       try {
         const result = await predictNextWord(text, 5);
+
+        // Ignore stale responses
+        if (!isActive || currentRequestId !== requestIdRef.current) return;
+
         setPredictions(result.predictions);
         setFallbackUsed(result.fallback_used);
-        setPredictionsMode((prev) => prev + 1);
+        setPredictionsCount((prev) => prev + 1);
       } catch (error) {
         console.error('Prediction error:', error);
-        setPredictions([]);
+        if (isActive) setPredictions([]);
       } finally {
-        setLoading(false);
+        clearTimeout(loadingTimeout);
+        if (isActive) setLoading(false);
       }
     };
 
-    const timeoutId = setTimeout(fetchPredictions, 300);
-    return () => clearTimeout(timeoutId);
+    const debounceTimeout = setTimeout(fetchPredictions, 300);
+
+    return () => {
+      isActive = false;
+      clearTimeout(debounceTimeout);
+    };
   }, [text]);
 
-  const handleSelectPrediction = (word: string) => {
-    const newText = text.trim() ? `${text} ${word}` : word;
-    setText(newText);
+  const handleSelectPrediction = useCallback(
+    (word: string) => {
+      const newText = text.trim() ? `${text} ${word}` : word;
+      setText(newText);
 
-    if (predictions.length > 0 && predictions[0].word === word) {
-      setTopAccepted((prev) => prev + 1);
-    }
-  };
+      if (predictions.length > 0 && predictions[0].word === word) {
+        setTopAccepted((prev) => prev + 1);
+      }
+    },
+    [text, predictions],
+  );
 
   const handleClearText = () => {
     setText('');
     setPredictions([]);
     setFallbackUsed('empty');
+    setLoading(false);
   };
 
   return (
     <div className='min-h-screen flex flex-col'>
       <Header />
 
-      <main className='flex-1 container mx-auto p-4'>
+      <main className='flex-1 container mx-auto px-4 py-8'>
         <div className='space-y-6 max-w-4xl mx-auto'>
-          {/* Combined: Text Input + Predictions */}
+          {/*Text Input + Predictions */}
           <TextInput
             value={text}
             onChange={setText}
@@ -74,14 +97,14 @@ function App() {
 
           {/* Stats Panel */}
           <StatsPanel
-            predictionsMode={predictionsMode}
+            predictionsMode={predictionsCount}
             topAccepted={topAccepted}
           />
         </div>
       </main>
 
-      <footer className='bg-white border-t border-gray-200 mt-8'>
-        <div className='container mx-auto p-4 text-center text-gray-600 text-sm'>
+      <footer className='bg-white border-t border-gray-200 '>
+        <div className='container mx-auto px-4 py-6 text-center text-gray-600 text-sm '>
           <p>| Trained on WikiText-103 |</p>
         </div>
       </footer>
