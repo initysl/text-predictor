@@ -1,6 +1,6 @@
 import pickle
 import random
-from predict import TextPredictor
+from server.core.predict import TextPredictor
 
 
 def load_test_data(file_path, sample_size=10000):

@@ -1,117 +1,206 @@
 # Text Predictor
 
-A text prediction model trained on the WikiText-103 dataset.
+An ML-powered next-word prediction application using N-gram language models trained on WikiText-103.
 
 ## Overview
 
-This project implements an machine learning text predictor system. It analyzes sequences of words to predict the next word in a sentence. The model is trained on the WikiText-103 dataset, which contains a large corpus of text from Wikipedia articles.
-
-## Features
-
-- Build trigram models from text data
-- Predict next words based on context
-- Explore and analyze text datasets
-- Web application for interactive predictions (planned)
-- Unit tests for model validation
+This project implements a real-time text prediction system that suggests the next word as you type. Built with machine learning (N-gram models), it features a modern React frontend and FastAPI backend. The model is trained on WikiText-103, a high-quality dataset of Wikipedia articles containing over 100 million tokens.
 
 ## Project Structure
 
 ```
 text-predictor/
-├── README.md
-├── requirements.txt
-├── app/
-│   └── app.py                 # Web application (Flask/FastAPI)
-├── data/
-│   └── wikitext-103/          # WikiText-103 dataset
-│       ├── wiki.train.tokens
-│       ├── wiki.valid.tokens
-│       └── wiki.test.tokens
-├── models/                    # Trained models
-├── src/
-│   ├── train.py               # Model training script
-│   ├── predict.py             # Prediction functions
-│   ├── evaluate.py            # Model evaluation
-│   └── explore.py             # Data exploration
-└── tests/
-    └── test_model.py          # Unit tests
+│
+├── server/                     # Python backend
+│   ├── .venv/                  # Python virtual environment
+│   ├── api/                    # FastAPI application
+│   │   ├── main.py             # API endpoints
+│   │   ├── schemas.py          # Request/response models
+│   │   ├── models.py           # ML model loader
+│   │   └── requirements.txt    # Python dependencies
+│   ├── core/                   # Core ML logic
+│   │   ├── train.py            # Model training script
+│   │   ├── predict.py          # Prediction engine
+│   │   ├── evaluate.py         # Model evaluation
+│   │   └── cli.py              # Command-line interface
+│   ├── models/                 # Trained models
+│   │   ├── trigram_model.pkl
+│   │   ├── bigram_model.pkl
+│   │   ├── common_words.pkl
+│   │   ├── sentence_starters.pkl
+│   │   └── evaluation_results.pkl
+│   └── data/                   # Training data
+│       └── wikitext-103/
+│           ├── wiki.train.tokens
+│           ├── wiki.test.tokens
+│           └── wiki.valid.tokens
+│
+└── client/                     # React frontend
+    ├── node_modules/           # Node dependencies
+    ├── src/
+    │   ├── components/         # React components
+    │   │   ├── Header.tsx
+    │   │   ├── TextInput.tsx
+    │   │   └── StatsPanel.tsx
+    │   ├── services/           # API integration
+    │   │   └── api.ts
+    │   ├── types/              # TypeScript types
+    │   │   └── index.ts
+    │   ├── App.tsx             # Main app component
+    │   ├── main.tsx            # Entry point
+    │   └── index.css           # Global styles
+    ├── public/
+    ├── index.html
+    ├── package.json
+    ├── tsconfig.json
+    ├── vite.config.ts
+    └── tailwind.config.js
 ```
 
 ## Installation
 
-1. Clone the repository:
+### Prerequisites
 
-   ```bash
-   git clone <repository-url>
-   cd text-predictor
-   ```
+- Python 3.8+
+- Node.js 18+
+- pip & npm
 
-2. Create a virtual environment:
+### Backend Setup
 
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
+Navigate to server directory:
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+cd server
+```
+
+Create virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+Install Python dependencies:
+
+```bash
+cd api
+pip install -r requirements.txt
+```
+
+Download WikiText-103 dataset:
+
+- Download from Hugging Face or Kaggle
+- Extract to `server/data/wikitext-103/`
+
+Train the models(can tune max_vocab and min count as desire):
+
+```bash
+cd ../core
+python train.py
+```
+
+This will generate 4 model files in `server/models/`:
+
+- `trigram_model.pkl` (~50-200 MB)
+- `bigram_model.pkl` (~20-50 MB)
+- `common_words.pkl` (~1 MB)
+- `sentence_starters.pkl` (~1 MB)
+
+### Frontend Setup
+
+Navigate to client directory:
+
+```bash
+cd ../../client
+```
+
+Install Node dependencies:
+
+```bash
+npm install
+```
 
 ## Usage
 
-### Data Exploration
+### Running the Application
 
-Explore the WikiText-103 dataset:
-
-```bash
-python src/explore.py
-```
-
-### Training the Model
-
-Train the trigram model:
+**Terminal 1 - Start Backend:**
 
 ```bash
-python src/train.py
+cd server/api
+python main.py
 ```
 
-This will generate a `trigram_model.pkl` file in the `models/` directory.
+Backend runs on: http://localhost:8000
 
-### Testing the Model
-
-Run unit tests:
+**Terminal 2 - Start Frontend:**
 
 ```bash
-python -m pytest tests/
+cd client
+npm run dev
 ```
 
-Or run the test script directly:
+Frontend runs on: http://localhost:5173
+
+Open your browser and navigate to http://localhost:5173
+
+### Command-Line Interface
+
+Test predictions directly from terminal:
 
 ```bash
-python tests/test_model.py
+cd server/core
+python cli.py
 ```
 
-### Prediction
+### Model Evaluation
 
-Use the prediction functions (`predict.py`):
-
-```python
-from src.predict import predict_next_word
-
-context = ["The", "quick"]
-next_word = predict_next_word(context)
-print(next_word)
-```
-
-### Web Application
-
-Run the web app (to be implemented in `app/app.py`):
+Evaluate model accuracy on test data:
 
 ```bash
-python app/app.py
+cd server/core
+python evaluate.py
 ```
+
+Expected metrics:
+
+- Top-1 Accuracy: ~18% (first prediction correct)
+- Top-3 Accuracy: ~35% (correct word in top 3)
+- Top-5 Accuracy: ~42% (correct word in top 5)
+
+API documentation: http://localhost:8000/docs
+
+## Model Architecture
+
+### Fallback Chain
+
+- **Trigram ** - Uses last 2 words for prediction (highest accuracy)
+- **Bigram ** - Falls back to last 1 word if trigram not found
+- **Common Words ** - Returns most frequent words as last resort
+- **Sentence Starters ** - Special case for empty input
+
+### Training Details
+
+- Dataset: WikiText-103 (~100M tokens)
+- Vocabulary: 30,000 most common words
+- Min frequency: 5 occurrences
+- Training time: ~10-15 minutes on 8GB RAM
+- Model size: ~70-250 MB total
+
+## Known Limitations
+
+- Limited to 30k vocabulary (rare words not recognized)
+- Formal writing style (trained on Wikipedia)
+- No slang or modern internet language
+- Cannot understand long-term context (only last 2 words)
+- Case-insensitive (all predictions lowercase)
+
+## Future Improvements
+
+- Emoji predictions
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License
+
+Made with love!.
