@@ -31,10 +31,12 @@ dist/
 .pyre/
 .pytype/
 
+
+.env
 .vscode/
 .codex
 
+
 # Model artifacts and generated data
 server/data/wikitext-103/
-
 
