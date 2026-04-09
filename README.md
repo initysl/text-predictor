@@ -192,8 +192,6 @@ API documentation: http://localhost:8000/docs
 - Limited to 30k vocabulary (rare words not recognized)
 - Formal writing style (trained on Wikipedia)
 - No slang or modern internet language
-- Cannot understand long-term context (only last 2 words)
-- Case-insensitive (all predictions lowercase)
 
 ## Future Improvements
 
