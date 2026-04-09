@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from './components/Header';
 import TextInput from './components/TextInput';
 import StatsPanel from './components/StatsPanel';
+import Footer from './components/Footer';
 import { predictNextWord } from './services/api';
 import { Prediction } from './types';
-import { BsGithub } from 'react-icons/bs';
 
 function App() {
   const [text, setText] = useState('');
@@ -107,22 +107,7 @@ function App() {
           />
         </div>
       </main>
-
-      <footer className='bg-white border-t border-gray-200'>
-        <div className='max-w-4xl mx-auto px-4 py-5 flex justify-center flex-col sm:flex-row items-center  gap-3 text-sm text-gray-600'>
-          <p>Trained on WikiText-103</p>
-
-          <a
-            href='https://github.com/initysl/text-predictor'
-            target='_blank'
-            rel='noopener noreferrer'
-            className='flex items-center gap-2 hover:underline'
-          >
-            <BsGithub className='text-lg' />
-            View on GitHub
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
