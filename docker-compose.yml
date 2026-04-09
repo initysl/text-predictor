@@ -1,18 +1,25 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  server:
-    build: ./server
-    container_name: text_predictor_server
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    volumes:
+      - ./server/models:/app/models
+      - ./server/data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
     restart: unless-stopped
 
-  client:
-    build: ./client
-    container_name: text_predictor_client
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
-      - server
+      - backend
     restart: unless-stopped
