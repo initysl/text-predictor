@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api/ ./api/
 COPY core/ ./core/
 
-# Copy pre-trained models (IMPORTANT!)
+# Copy pre-trained models 
 COPY models/ ./models/
 
 # Railway provides PORT env variable
@@ -26,4 +26,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Use Railway's PORT
-CMD ["uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", $PORT]
+CMD uvicorn api.main:app --host 0.0.0.0 --port $PORT
