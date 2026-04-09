@@ -22,6 +22,9 @@ const TextInput: React.FC<TextInputProps> = ({
   onSelectPrediction,
   loading = false,
 }) => {
+  const safeValue = typeof value === 'string' ? value : '';
+  const safePredictions = Array.isArray(predictions) ? predictions : [];
+
   const getConfidenceColor = (probability: number): string => {
     if (probability >= 0.5)
       return 'bg-green-100 border-green-300 text-green-800';
@@ -72,7 +75,7 @@ const TextInput: React.FC<TextInputProps> = ({
         <h2 className='text-md font-semibold text-gray-800'>Your Text</h2>
         <button
           onClick={onClear}
-          disabled={disabled || !value}
+          disabled={disabled || !safeValue}
           className='px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
         >
           Clear
@@ -80,7 +83,7 @@ const TextInput: React.FC<TextInputProps> = ({
       </div>
 
       <textarea
-        value={value}
+        value={safeValue}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder='Start typing here...'
@@ -88,8 +91,8 @@ const TextInput: React.FC<TextInputProps> = ({
       />
 
       <div className='mt-4 flex items-center justify-between text-sm text-gray-600'>
-        <span>{value.split(/\s+/).filter(Boolean).length} words</span>
-        <span>{value.length} characters</span>
+        <span>{safeValue.split(/\s+/).filter(Boolean).length} words</span>
+        <span>{safeValue.length} characters</span>
       </div>
 
       {/* Predictions Section - Right below character count */}
@@ -98,25 +101,29 @@ const TextInput: React.FC<TextInputProps> = ({
           <div className='flex items-center justify-center py-8'>
             <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600'></div>
           </div>
-        ) : predictions.length === 0 ? (
+        ) : safePredictions.length === 0 ? (
           <div className='text-center py-8 text-gray-500'>
             <p className='text-sm'>Start typing to see predictions</p>
           </div>
         ) : (
           <div className='flex justify-center flex-wrap gap-3'>
-            {predictions.map((pred, index) => {
-              const confidenceColor = getConfidenceColor(pred.probability);
+            {safePredictions.map((pred, index) => {
+              const word = typeof pred?.word === 'string' ? pred.word : '[unknown]';
+              const probability = Number.isFinite(pred?.probability)
+                ? pred.probability
+                : 0;
+              const confidenceColor = getConfidenceColor(probability);
 
               return (
                 <button
                   key={index}
-                  onClick={() => onSelectPrediction(pred.word)}
+                  onClick={() => onSelectPrediction(word)}
                   className={`border-2 rounded-full px-2 py-1 transition-all hover:scale-105 hover:shadow-md ${confidenceColor}`}
                 >
                   <div className='flex items-center gap-2'>
-                    <span className='font-semibold'>{pred.word}</span>
+                    <span className='font-semibold'>{word}</span>
                     <span className='text-xs font-medium opacity-70'>
-                      {(pred.probability * 100).toFixed(0)}%
+                      {(probability * 100).toFixed(0)}%
                     </span>
                   </div>
                 </button>
