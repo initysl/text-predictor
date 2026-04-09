@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [predictionsCount, setPredictionsCount] = useState(0);
   const [topAccepted, setTopAccepted] = useState(0);
+  const [focusKey, setFocusKey] = useState(0);
 
   const requestIdRef = useRef(0);
 
@@ -63,6 +64,7 @@ function App() {
     (word: string) => {
       const newText = text.trim() ? `${text} ${word}` : word;
       setText(newText);
+      setFocusKey((prev) => prev + 1);
 
       if (predictions.length > 0 && predictions[0].word === word) {
         setTopAccepted((prev) => prev + 1);
@@ -76,6 +78,7 @@ function App() {
     setPredictions([]);
     setFallbackUsed('empty');
     setLoading(false);
+    setFocusKey((prev) => prev + 1);
   };
 
   return (
@@ -94,6 +97,7 @@ function App() {
             fallbackUsed={fallbackUsed}
             onSelectPrediction={handleSelectPrediction}
             loading={loading}
+            focusKey={focusKey}
           />
 
           {/* Stats Panel */}

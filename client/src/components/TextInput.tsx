@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Prediction } from '../types';
 import keyboard from '/keyboard.svg';
 
@@ -11,6 +11,7 @@ interface TextInputProps {
   fallbackUsed: string;
   onSelectPrediction: (word: string) => void;
   loading?: boolean;
+  focusKey?: number;
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -21,7 +22,9 @@ const TextInput: React.FC<TextInputProps> = ({
   predictions,
   onSelectPrediction,
   loading = false,
+  focusKey = 0,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const safeValue = typeof value === 'string' ? value : '';
   const safePredictions = Array.isArray(predictions) ? predictions : [];
 
@@ -32,6 +35,12 @@ const TextInput: React.FC<TextInputProps> = ({
       return 'bg-yellow-100 border-yellow-300 text-yellow-800';
     return 'bg-red-100 border-red-300 text-red-800';
   };
+
+  useEffect(() => {
+    if (!disabled) {
+      textareaRef.current?.focus();
+    }
+  }, [disabled, focusKey]);
 
   return (
     <div className='bg-white rounded-2xl border-t border-b border-gray-200 p-4'>
@@ -47,10 +56,12 @@ const TextInput: React.FC<TextInputProps> = ({
       </div>
 
       <textarea
+        ref={textareaRef}
         value={safeValue}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder='Start typing here...'
+        autoFocus
         className='w-full h-20 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none text-lg disabled:bg-gray-50 disabled:cursor-not-allowed transition-colors'
       />
 
