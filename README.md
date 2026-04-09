@@ -1,6 +1,7 @@
 # Text Predictor
 
 A next-word prediction application powered by N-gram language models trained on WikiText-103.
+Hey champ, appreciate you giving this work a star! 🌟
 
 ## Overview
 
