@@ -6,4 +6,6 @@ __pycache__
 .env
 .git
 .gitignore
-data/
+README.md
+.pytest_cache
+*.egg-info
