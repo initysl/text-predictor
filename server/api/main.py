@@ -28,10 +28,12 @@ origins = os.getenv("CORS_ORIGINS", "*")
 origins_list = [origin.strip() for origin in origins.split(",") if origin]
 if not origins_list:
     origins_list = ["http://localhost:5173"]
+allow_all_origins = "*" in origins_list
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins_list,
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all_origins else origins_list,
+    allow_credentials=not allow_all_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
