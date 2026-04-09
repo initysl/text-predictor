@@ -1,4 +1,3 @@
-# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -10,23 +9,18 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-
-# Build with production optimizations
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+FROM node:20-alpine
 
-ENV PORT=80
-ENV API_UPSTREAM=http://backend:8000
+WORKDIR /app
 
-# Copy runtime nginx template
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+RUN npm install -g serve
 
-# Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist ./dist
 
-EXPOSE 80
+ENV PORT=3000
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+
+CMD ["sh", "-c", "serve -s dist -l tcp://0.0.0.0:${PORT:-3000}"]
