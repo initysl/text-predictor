@@ -203,4 +203,4 @@ API documentation: http://localhost:8000/docs
 
 This project is licensed under the MIT License
 
-Made with love!.
+Made with love 💘!.

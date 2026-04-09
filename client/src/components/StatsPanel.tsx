@@ -12,6 +12,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   topAccepted,
 }) => {
   const [modelStats, setModelStats] = useState<Stats | null>(null);
+  const [statsError, setStatsError] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -21,9 +22,16 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
     try {
       const stats = await getStats();
       setModelStats(stats);
+      setStatsError(false);
     } catch (error) {
       console.error('Failed to load stats:', error);
+      setStatsError(true);
     }
+  };
+
+  const formatCount = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(numericValue) ? numericValue.toLocaleString() : '--';
   };
 
   const accuracy =
@@ -67,23 +75,29 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
             <div className='flex justify-between'>
               <span className='text-gray-600'>Trigrams:</span>
               <span className='font-semibold'>
-                {modelStats.trigram_count.toLocaleString()}
+                {formatCount(modelStats.trigram_count)}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-gray-600'>Bigrams:</span>
               <span className='font-semibold'>
-                {modelStats.bigram_count.toLocaleString()}
+                {formatCount(modelStats.bigram_count)}
               </span>
             </div>
             <div className='flex justify-between'>
               <span className='text-gray-600'>Vocabulary:</span>
               <span className='font-semibold'>
-                {modelStats.vocabulary_size.toLocaleString()}
+                {formatCount(modelStats.vocabulary_size)}
               </span>
             </div>
           </div>
         </div>
+      )}
+
+      {statsError && (
+        <p className='text-sm text-red-600'>
+          Model stats are unavailable right now.
+        </p>
       )}
     </div>
   );
