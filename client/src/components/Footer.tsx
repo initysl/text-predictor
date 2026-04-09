@@ -1,5 +1,6 @@
 import React from 'react';
-import { BsGithub, BsX } from 'react-icons/bs';
+import { FaGithubSquare } from 'react-icons/fa';
+import { FaSquareXTwitter } from 'react-icons/fa6';
 
 const Footer: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const Footer: React.FC = () => {
           rel='noopener noreferrer'
           className='flex items-center gap-2 hover:underline'
         >
-          <BsGithub className='text-lg' />
+          <FaGithubSquare className='text-lg' />
         </a>
 
         <a
@@ -22,7 +23,7 @@ const Footer: React.FC = () => {
           rel='noopener noreferrer'
           className='flex items-center gap-2 hover:underline'
         >
-          <BsX className='text-lg' />
+          <FaSquareXTwitter className='text-lg' />
         </a>
       </div>
     </footer>
