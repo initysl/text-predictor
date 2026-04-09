@@ -1,7 +1,7 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-WORKDIR /app
+WORKDIR /src
 
 COPY package.json package-lock.json* ./
 RUN npm install
