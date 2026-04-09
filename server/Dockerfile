@@ -1,25 +1,29 @@
-# Use slim Python image
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system deps (minimal)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first (cache optimization)
-COPY requirements.txt .
+# Copy requirements first (layer caching)
+COPY api/requirements.txt .
 
-# Install Python deps
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy rest of backend code
-COPY . .
+# Copy application code
+COPY api/ ./api/
+COPY core/ ./core/
 
-# Expose FastAPI port
+# Copy pre-trained models (IMPORTANT!)
+COPY models/ ./models/
+
+# Railway provides PORT env variable
+ENV PORT=8000
+
 EXPOSE 8000
 
-# Run server
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use Railway's PORT
+CMD uvicorn api.main:app --host 0.0.0.0 --port $PORT
