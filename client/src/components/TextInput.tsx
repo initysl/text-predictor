@@ -1,5 +1,6 @@
 import React from 'react';
 import { Prediction } from '../types';
+import keyboard from '/keyboard.svg';
 
 interface TextInputProps {
   value: string;
@@ -18,7 +19,6 @@ const TextInput: React.FC<TextInputProps> = ({
   onClear,
   disabled = false,
   predictions,
-  // fallbackUsed,
   onSelectPrediction,
   loading = false,
 }) => {
@@ -32,42 +32,6 @@ const TextInput: React.FC<TextInputProps> = ({
       return 'bg-yellow-100 border-yellow-300 text-yellow-800';
     return 'bg-red-100 border-red-300 text-red-800';
   };
-
-  // const getFallbackBadge = () => {
-  //   const badges = {
-  //     trigram: {
-  //       emoji: '🎯',
-  //       text: 'Trigram',
-  //       color: 'bg-purple-100 text-purple-800',
-  //     },
-  //     bigram: {
-  //       emoji: '🎲',
-  //       text: 'Bigram',
-  //       color: 'bg-blue-100 text-blue-800',
-  //     },
-  //     common: {
-  //       emoji: '📚',
-  //       text: 'Common',
-  //       color: 'bg-gray-100 text-gray-800',
-  //     },
-  //     empty: {
-  //       emoji: '✨',
-  //       text: 'Starter',
-  //       color: 'bg-pink-100 text-pink-800',
-  //     },
-  //   };
-
-  //   const badge = badges[fallbackUsed as keyof typeof badges] || badges.common;
-
-  //   return (
-  //     <span
-  //       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${badge.color}`}
-  //     >
-  //       <span className='mr-1'>{badge.emoji}</span>
-  //       {badge.text}
-  //     </span>
-  //   );
-  // };
 
   return (
     <div className='bg-white rounded-2xl border-t border-b border-gray-200 p-4'>
@@ -95,11 +59,15 @@ const TextInput: React.FC<TextInputProps> = ({
         <span>{safeValue.length} characters</span>
       </div>
 
-      {/* Predictions Section - Right below character count */}
+      {/* Predictions Section */}
       <div className='mt-6 border-t border-gray-200 pt-6'>
         {loading ? (
           <div className='flex items-center justify-center py-8'>
-            <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600'></div>
+            <img
+              src={keyboard}
+              alt='Loading predictions'
+              className='h-10 w-10 animate-pulse'
+            />
           </div>
         ) : safePredictions.length === 0 ? (
           <div className='text-center py-8 text-gray-500'>
@@ -108,7 +76,8 @@ const TextInput: React.FC<TextInputProps> = ({
         ) : (
           <div className='flex justify-center flex-wrap gap-3'>
             {safePredictions.map((pred, index) => {
-              const word = typeof pred?.word === 'string' ? pred.word : '[unknown]';
+              const word =
+                typeof pred?.word === 'string' ? pred.word : '[unknown]';
               const probability = Number.isFinite(pred?.probability)
                 ? pred.probability
                 : 0;
