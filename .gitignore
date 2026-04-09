@@ -34,7 +34,6 @@ dist/
 .vscode/
 
 # Model artifacts and generated data
-server/models/*.pkl
 server/data/wikitext-103/
 
 
