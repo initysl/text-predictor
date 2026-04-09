@@ -1,10 +1,22 @@
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from schemas import PredictionRequest, PredictionResponse, Prediction, StatsResponse
-from models import ModelManager
+
+try:
+    from .schemas import (
+        Prediction,
+        PredictionRequest,
+        PredictionResponse,
+        StatsResponse,
+    )
+    from .models import ModelManager
+except ImportError:
+    from schemas import Prediction, PredictionRequest, PredictionResponse, StatsResponse
+    from models import ModelManager
 
 app = FastAPI(
     title="Text Predictor API",
