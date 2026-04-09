@@ -174,17 +174,17 @@ API documentation: http://localhost:8000/docs
 
 ### Fallback Chain
 
-- **Trigram ** - Uses last 2 words for prediction (highest accuracy)
-- **Bigram ** - Falls back to last 1 word if trigram not found
-- **Common Words ** - Returns most frequent words as last resort
-- **Sentence Starters ** - Special case for empty input
+- Trigram - Uses last 2 words for prediction (highest accuracy)
+- Bigram - Falls back to last 1 word if trigram not found
+- Common Words - Returns most frequent words as last resort
+- Sentence Starters - Special case for empty input
 
 ### Training Details
 
 - Dataset: WikiText-103 (~100M tokens)
 - Vocabulary: 30,000 most common words
 - Min frequency: 5 occurrences
-- Training time: ~10-15 minutes on 8GB RAM
+- Training time: Depends on choosen max_vocab and min_count
 - Model size: ~70-250 MB total
 
 ## Known Limitations
