@@ -1,6 +1,10 @@
 import pickle
 import random
-from server.core.predict import TextPredictor
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from predict import TextPredictor, DEFAULT_MODEL_DIR
 
 
 def load_test_data(file_path, sample_size=10000):
@@ -46,7 +50,7 @@ def evaluate_model(predictor, test_sentences, top_k_values=[1, 3, 5]):
     
     total_predictions = 0
     correct_at_k = {k: 0 for k in top_k_values}
-    fallback_counts = {'trigram': 0, 'bigram': 0, 'common': 0}
+    fallback_counts = {'trigram': 0, 'bigram': 0, 'unigram': 0}
     
     max_k = max(top_k_values)
     
@@ -62,10 +66,10 @@ def evaluate_model(predictor, test_sentences, top_k_values=[1, 3, 5]):
             context_text = ' '.join(context_words)
             
             # Actual next word
-            actual_word = sentence[i].lower()
+            actual_word = predictor._clean_token(sentence[i]).lower()
             
             # Skip <unk> tokens in test
-            if actual_word == '<unk>':
+            if sentence[i] == '<unk>':
                 continue
             
             # Get predictions
@@ -77,7 +81,7 @@ def evaluate_model(predictor, test_sentences, top_k_values=[1, 3, 5]):
             fallback_counts[fallback_used] = fallback_counts.get(fallback_used, 0) + 1
             
             # Extract predicted words
-            predicted_words = [word for word, prob in predictions]
+            predicted_words = [word.lower() for word, prob in predictions]
             
             # Check accuracy at different K values
             for k in top_k_values:
@@ -129,7 +133,7 @@ def print_results(results):
     print("\n" + "-"*60)
 
 
-def save_results(results, output_path='models/evaluation_results.pkl'):
+def save_results(results, output_path=DEFAULT_MODEL_DIR / 'evaluation_results.pkl'):
     """Save evaluation results"""
     with open(output_path, 'wb') as f:
         pickle.dump(results, f)
@@ -145,7 +149,7 @@ def main():
     
     # Load test data
     test_sentences = load_test_data(
-        'data/wikitext-103/wiki.test.tokens',
+        DEFAULT_MODEL_DIR.parent / 'data' / 'wikitext-103' / 'wiki.test.tokens',
         sample_size=10000  # Adjust based on your patience
     )
     

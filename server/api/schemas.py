@@ -1,10 +1,13 @@
-from pydantic import BaseModel
-from typing import List
+from typing import Dict, List, Literal, Optional
+
+from pydantic import BaseModel, Field
+
+PredictionSource = Literal['trigram', 'bigram', 'unigram', 'sentence_start']
 
 
 class PredictionRequest(BaseModel):
-    text: str
-    top_k: int = 5
+    text: str = Field('', max_length=2000)
+    top_k: int = Field(5, ge=1, le=10)
 
 
 class Prediction(BaseModel):
@@ -14,8 +17,18 @@ class Prediction(BaseModel):
 
 class PredictionResponse(BaseModel):
     predictions: List[Prediction]
-    fallback_used: str
+    source: PredictionSource
+    context: List[str]
     input_words: int
+    # Deprecated alias of `source`
+    fallback_used: str
+
+
+class Evaluation(BaseModel):
+    total_predictions: int
+    accuracies: Dict[str, float]
+    fallback_usage: Dict[str, int]
+    coverage: float
 
 
 class StatsResponse(BaseModel):
@@ -23,3 +36,5 @@ class StatsResponse(BaseModel):
     bigram_count: int
     common_words_count: int
     vocabulary_size: int
+    model_size_mb: float
+    evaluation: Optional[Evaluation] = None
