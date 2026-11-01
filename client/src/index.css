@@ -1,7 +1,144 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 
-body {
-  margin: 0;
-  font-family: 'Roboto', sans-serif;
-  min-height: 100vh;
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Light tokens */
+:root {
+  color-scheme: light;
+  --bg: #f6f6f4;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --line: #e4e3df;
+  --fg: #0b0b0b;
+  --fg-2: #52514e;
+  --fg-3: #8a8983;
+  --accent: #256abf;
+  --accent-soft: #e6effa;
+  --track: #cde2fb;
+  --ghost: #a9a8a2;
+  /* Validated categorical slots 1-3 (dataviz reference palette) */
+  --series-trigram: #2a78d6;
+  --series-bigram: #eb6834;
+  --series-unigram: #1baf7a;
+  --series-neutral: #8a8983;
+  --ok: #0ca30c;
+  --critical: #d03b3b;
+}
+
+/* Dark tokens, stepped for the dark surface */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --line: #2e2e2b;
+  --fg: #f0efec;
+  --fg-2: #c3c2b7;
+  --fg-3: #85847c;
+  --accent: #6da7ec;
+  --accent-soft: #1c2a3d;
+  --track: #184f95;
+  --ghost: #5f5e58;
+  --series-trigram: #3987e5;
+  --series-bigram: #d95926;
+  --series-unigram: #199e70;
+  --series-neutral: #85847c;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-track: var(--track);
+  --color-ghost: var(--ghost);
+  --color-trigram: var(--series-trigram);
+  --color-bigram: var(--series-bigram);
+  --color-unigram: var(--series-unigram);
+  --color-neutral: var(--series-neutral);
+  --color-ok: var(--ok);
+  --color-critical: var(--critical);
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Shared typography for the textarea and its ghost-text mirror; must match exactly */
+.editor-text {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  line-height: 1.75;
+  letter-spacing: -0.011em;
+  padding: 1.5rem 1.5rem 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+}
+
+@media (max-width: 640px) {
+  .editor-text {
+    font-size: 1.125rem;
+    padding: 1.25rem 1rem 0.75rem;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.animate-rise {
+  animation: rise-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.animate-fade {
+  animation: fade-in 160ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-fade {
+    animation: none;
+  }
 }

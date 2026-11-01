@@ -1,112 +1,89 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import Header from './components/Header';
-import TextInput from './components/TextInput';
-import StatsPanel from './components/StatsPanel';
+import { useCallback, useState } from 'react';
+import Editor from './components/Editor';
+import ExplainPanel from './components/ExplainPanel';
 import Footer from './components/Footer';
-import { predictNextWord } from './services/api';
-import { Prediction } from './types';
+import Header from './components/Header';
+import InsightsPanel from './components/InsightsPanel';
+import SuggestionBar from './components/SuggestionBar';
+import { useModelStats } from './hooks/useModelStats';
+import { usePredictions } from './hooks/usePredictions';
+import { useTheme } from './hooks/useTheme';
+import { applyPrediction } from './lib/text';
 
 function App() {
   const [text, setText] = useState('');
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [fallbackUsed, setFallbackUsed] = useState('empty');
-  const [loading, setLoading] = useState(false);
-  const [predictionsCount, setPredictionsCount] = useState(0);
-  const [topAccepted, setTopAccepted] = useState(0);
   const [focusKey, setFocusKey] = useState(0);
 
-  const requestIdRef = useRef(0);
+  const { predictions, source, context, forText, status, slow } = usePredictions(text);
+  const { stats, status: statsStatus } = useModelStats();
+  const { preference, cycle } = useTheme();
 
-  useEffect(() => {
-    if (!text.trim()) {
-      setPredictions([]);
-      setFallbackUsed('empty');
-      setLoading(false);
-      return;
-    }
+  const fresh = forText === text && status === 'ready';
+  const online =
+    status === 'error' || statsStatus === 'offline'
+      ? false
+      : statsStatus === 'online' || status === 'ready'
+        ? true
+        : null;
 
-    const currentRequestId = ++requestIdRef.current;
-    let isActive = true;
-
-    const fetchPredictions = async () => {
-      // Delay showing loading to avoid flicker
-      const loadingTimeout = setTimeout(() => {
-        if (isActive) setLoading(true);
-      }, 150);
-
-      try {
-        const result = await predictNextWord(text, 5);
-
-        // Ignore stale responses
-        if (!isActive || currentRequestId !== requestIdRef.current) return;
-
-        setPredictions(result.predictions);
-        setFallbackUsed(result.fallback_used);
-        setPredictionsCount((prev) => prev + 1);
-      } catch (error) {
-        console.error('Prediction error:', error);
-        if (isActive) setPredictions([]);
-      } finally {
-        clearTimeout(loadingTimeout);
-        if (isActive) setLoading(false);
-      }
-    };
-
-    const debounceTimeout = setTimeout(fetchPredictions, 300);
-
-    return () => {
-      isActive = false;
-      clearTimeout(debounceTimeout);
-    };
-  }, [text]);
-
-  const handleSelectPrediction = useCallback(
-    (word: string) => {
-      const newText = text.trim() ? `${text} ${word}` : word;
-      setText(newText);
-      setFocusKey((prev) => prev + 1);
-
-      if (predictions.length > 0 && predictions[0].word === word) {
-        setTopAccepted((prev) => prev + 1);
-      }
+  const handleAccept = useCallback(
+    (index: number) => {
+      const prediction = predictions[index];
+      if (!prediction) return;
+      setText((current) => applyPrediction(current, prediction.word));
+      setFocusKey((k) => k + 1);
     },
-    [text, predictions],
+    [predictions],
   );
 
-  const handleClearText = () => {
+  const handleClear = () => {
     setText('');
-    setPredictions([]);
-    setFallbackUsed('empty');
-    setLoading(false);
-    setFocusKey((prev) => prev + 1);
+    setFocusKey((k) => k + 1);
   };
 
   return (
-    <div className='min-h-screen flex flex-col'>
-      <Header />
+    <div className='flex min-h-screen flex-col'>
+      <Header online={online} theme={preference} onCycleTheme={cycle} />
 
-      <main className='flex-1 container mx-auto px-4 py-8'>
-        <div className='space-y-6 max-w-4xl mx-auto'>
-          {/*Text Input + Predictions */}
-          <TextInput
-            value={text}
-            onChange={setText}
-            onClear={handleClearText}
-            disabled={loading}
+      <main className='mx-auto w-full max-w-3xl flex-1 px-4 pt-10 pb-16 sm:pt-14'>
+        <div className='mb-6 sm:mb-8'>
+          <h1 className='text-2xl font-semibold tracking-tight text-balance text-fg sm:text-3xl'>
+            Start a sentence. The model finishes it.
+          </h1>
+          <p className='mt-2 max-w-xl text-sm leading-relaxed text-pretty text-fg-2 sm:text-[15px]'>
+            Next-word suggestions from trigram and bigram statistics over 100 million words of
+            Wikipedia, with no neural network involved.
+          </p>
+        </div>
+
+        <Editor
+          value={text}
+          onChange={setText}
+          onAccept={handleAccept}
+          onClear={handleClear}
+          topWord={fresh ? (predictions[0]?.word ?? null) : null}
+          suggestionCount={predictions.length}
+          focusKey={focusKey}
+        >
+          <SuggestionBar
             predictions={predictions}
-            fallbackUsed={fallbackUsed}
-            onSelectPrediction={handleSelectPrediction}
-            loading={loading}
-            focusKey={focusKey}
+            stale={!fresh && slow}
+            error={status === 'error'}
+            onSelect={handleAccept}
           />
+        </Editor>
 
-          {/* Stats Panel */}
-          <StatsPanel
-            predictionsMode={predictionsCount}
-            topAccepted={topAccepted}
+        <div className='mt-6 grid gap-6 md:grid-cols-2'>
+          <ExplainPanel
+            source={source}
+            context={context}
+            predictions={predictions}
+            stale={!fresh && slow}
           />
+          <InsightsPanel stats={stats} status={statsStatus} />
         </div>
       </main>
+
       <Footer />
     </div>
   );
