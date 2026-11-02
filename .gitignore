@@ -40,3 +40,5 @@ dist/
 # Model artifacts and generated data
 server/data/wikitext-103/
 
+# Local deployment notes
+deploy.md
