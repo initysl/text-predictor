@@ -35,7 +35,7 @@ const ExplainPanel: React.FC<ExplainPanelProps> = ({ source, context, prediction
       title='Why these words'
       subtitle='How the model picked its suggestions'
       action={
-        <span className='flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-xs font-medium text-fg-2'>
+        <span className='flex shrink-0 items-center gap-1.5 rounded-full border whitespace-nowrap border-line px-2.5 py-1 text-xs font-medium text-fg-2'>
           <span aria-hidden className={`size-2 rounded-full ${meta.swatch}`} />
           {meta.label}
         </span>

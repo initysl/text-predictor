@@ -13,6 +13,7 @@ interface EditorProps {
   suggestionCount: number;
   /** Bumped by the parent to refocus after a programmatic edit */
   focusKey: number;
+  className?: string;
   children?: React.ReactNode;
 }
 
@@ -24,10 +25,12 @@ const Editor: React.FC<EditorProps> = ({
   topWord,
   suggestionCount,
   focusKey,
+  className = '',
   children,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const mirrorRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const [caretAtEnd, setCaretAtEnd] = useState(true);
   const [dismissedFor, setDismissedFor] = useState<string | null>(null);
 
@@ -40,6 +43,12 @@ const Editor: React.FC<EditorProps> = ({
     if (!el) return;
     el.style.height = 'auto';
     el.style.height = `${Math.max(el.scrollHeight, mirrorRef.current?.scrollHeight ?? 0)}px`;
+
+    // On desktop the card scrolls instead; keep the caret and ghost in view while writing at the end
+    const scroller = scrollRef.current;
+    if (scroller && document.activeElement === el && el.selectionEnd === el.value.length) {
+      scroller.scrollTop = scroller.scrollHeight;
+    }
   }, [value, ghost]);
 
   // After an accept or clear, return focus with the caret at the end
@@ -78,8 +87,9 @@ const Editor: React.FC<EditorProps> = ({
   const words = countWords(value);
 
   return (
-    <section className='rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] transition-shadow focus-within:border-accent/40 focus-within:shadow-[0_0_0_4px_var(--accent-soft)]'>
-      <div className='relative'>
+    <section className={`flex flex-col rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] transition-shadow focus-within:border-accent/40 focus-within:shadow-[0_0_0_4px_var(--accent-soft)] ${className}`}>
+      <div ref={scrollRef} className='xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:[scrollbar-width:thin]'>
+      <div className='relative flex min-h-full flex-col'>
         <div
           ref={mirrorRef}
           aria-hidden
@@ -110,14 +120,15 @@ const Editor: React.FC<EditorProps> = ({
           autoFocus
           spellCheck
           rows={4}
-          className='editor-text relative block min-h-[8rem] sm:min-h-[11rem] w-full resize-none overflow-hidden bg-transparent text-fg caret-accent outline-none placeholder:text-fg-3 focus-visible:outline-none'
+          className='editor-text relative block min-h-[8rem] w-full flex-[1_0_auto] sm:min-h-[11rem] resize-none overflow-hidden bg-transparent text-fg caret-accent outline-none placeholder:text-fg-3 focus-visible:outline-none'
         />
+      </div>
       </div>
 
       {children}
 
       <div className='flex items-center justify-between gap-3 border-t border-line px-4 py-2.5 text-xs text-fg-3 sm:px-6'>
-        <span className='font-mono tabular-nums'>
+        <span className='font-mono whitespace-nowrap tabular-nums'>
           {words} {words === 1 ? 'word' : 'words'} · {value.length} chars
         </span>
         <div className='flex items-center gap-4'>
@@ -125,8 +136,10 @@ const Editor: React.FC<EditorProps> = ({
             <Kbd>Tab</Kbd> accept
             <span className='mx-1 text-line'>|</span>
             <Kbd>⌥ 1–5</Kbd> pick
-            <span className='mx-1 text-line'>|</span>
-            <Kbd>Esc</Kbd> hide
+            <span className='contents xl:hidden 2xl:contents'>
+              <span className='mx-1 text-line'>|</span>
+              <Kbd>Esc</Kbd> hide
+            </span>
           </span>
           <button
             type='button'

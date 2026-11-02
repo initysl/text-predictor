@@ -36,7 +36,7 @@ const SuggestionBar: React.FC<SuggestionBarProps> = ({ predictions, stale, error
         </div>
       ) : (
         <ul
-          className={`flex gap-2 overflow-x-auto [scrollbar-width:none] transition-opacity duration-150 ${stale ? 'opacity-55' : ''}`}
+          className={`flex gap-2 overflow-x-auto [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)] pr-8 [scrollbar-width:none] transition-opacity duration-150 ${stale ? 'opacity-55' : ''}`}
           aria-label='Next-word suggestions'
         >
           {predictions.map((pred, index) => {
